@@ -6,7 +6,7 @@ Accounts.config({ sendVerificationEmail: verifyEmail });
   
 
 Meteor.startup(function() {
-console.log(Meteor.users.find());
+
 	// read environment variables from Meteor.settings
 	if(Meteor.settings && Meteor.settings.env && _.isObject(Meteor.settings.env)) {
 		for(var variableName in Meteor.settings.env) {
@@ -57,17 +57,17 @@ Meteor.methods({
 
 
 	
-		 jsonResponse = Meteor.http.call('GET', 'http://demo3065031.mockable.io/NASTYDATA');
-		 	 console.log(JSON.parse(jsonResponse.content));
+		 jsonResponse = Meteor.http.call('GET', 'http://demo6938769.mockable.io/healthcaresocialapi');
+		 	 
 		for (i = 0; i < 1000; i++) 
 	 {
-	 console.log(JSON.parse(jsonResponse.content).userA[i].EmailId);
-			if(Meteor.user().profile.email==JSON.parse(jsonResponse.content).userA[i].EmailId)
+	 
+			if(Meteor.user().profile.email==JSON.parse(jsonResponse.content).userA[i].HealthCareLogin)
 			{
 			if(j!=1)
 			{
 						 jsonResponse = JSON.parse(jsonResponse.content).userA[i];
-						 console.log(jsonResponse.PolicyNumber);
+						 
 						break;
 						j++;
 					}	
