@@ -34,12 +34,12 @@ Template.Register.events({
 		}
 
 		// check email
-		//if(!isValidEmail(register_email))
-		//{
-			//pageSession.set("errorMessage", "Please enter valid e-mail address.");
-			//t.find('#register_email').focus();
-			//return false;
-		//}
+		if(!isValidEmail(register_email))
+		{
+			pageSession.set("errorMessage", "Please enter valid e-mail address.");
+			t.find('#register_email').focus();
+			return false;
+		}
 
 		// check password
 		var min_password_len = 6;

@@ -1,43 +1,13 @@
-
 <template name="HomePrivate">
 	<div class="page-container container" id="content">
 		<div class="row" id="title_row">
 			<div class="col-md-12">
 				<h2 id="page_title" class="pull-left">
 					Welcome {{userFullName}}!
-				</h2></div>
-				<div id="page_menu" class=" col-md-12 pull-left">
-				<div class="tableborder">
-				<div class="divborder"><span class="rowborder">Policy Number</span><span >:
-				{{getRecords.PolicyNumber}}
-				</span>
-				
+				</h2>
+				<div id="page_menu" class="pull-right">
 				</div>
-				<div class="divborder"><span class="rowborder">InsuranceCompany</span><span>:
-				{{getRecords.InsuranceCompany}}
-				</span>
-				</div>
-					<div class="divborder"><span class="rowborder">Policy Holder Name</span><span >:
-				{{getRecords.PolicyHolderName}}
-				</span>
-				</div>
-				<div class="divborder"><span class="rowborder">Policy From</span><span >:
-				{{getRecords.PolicyFrom}}
-				</span>
-				</div>
-				<div class="divborder"><span class="rowborder">Policy To</span><span>:
-				{{getRecords.PolicyTo}}
-				</span>
-				</div>
-				</div>
-				<div class="imagepadding">
-				<img src="whoareu.jpg" alt="login with face book" height="60" width="60"><span>
-				<span><a href="#"><img alt="follow me on facebook" src="fb.jpg" height="60" width="200"/></a></span>
-				<br/><span class="divborder rowborder">Profile Name:</span><span>{{userFullName}}</span><br/>
-				
-				</span>
-				</div>
-		</div>
+			</div>
 		</div>
 	</div>
 </template>
