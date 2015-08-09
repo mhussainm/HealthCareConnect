@@ -51,7 +51,6 @@ Helpers.userEmail = function() {
 	return email;
 };
 
-
 Helpers.randomString = function(strLen) {
 	return Random.id(strLen);
 };
