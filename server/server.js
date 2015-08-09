@@ -61,7 +61,7 @@ Meteor.methods({
 		 	 
 		for (i = 0; i < 1000; i++) 
 	 {
-	 
+	  
 			if(Meteor.user().profile.email==JSON.parse(jsonResponse.content).userA[i].HealthCareLogin)
 			{
 			if(j!=1)

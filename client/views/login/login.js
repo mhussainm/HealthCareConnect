@@ -23,10 +23,10 @@ Template.Login.events({
 
 		// check email
 		//if(!isValidEmail(login_email))
-		//{
-			//pageSession.set("errorMessage", "Please enter your e-mail address.");
-			//t.find('#login_email').focus();
-			//return false;
+	//	{
+		//	pageSession.set("errorMessage", "Please enter your e-mail address.");
+		//	t.find('#login_email').focus();
+		//	return false;
 		//}
 
 		// check password
