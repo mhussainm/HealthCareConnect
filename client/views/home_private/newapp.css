@@ -1,0 +1,40 @@
+.whoareu
+{
+    background: url(whoareu.jpg) ; 
+    background-position: right bottom, left top;
+    background-repeat: no-repeat, repeat;
+	
+}
+.tableborder
+{
+padding-top:30px;
+}
+.divborder
+{
+font-style:italic;
+font-size:12px;
+}
+.rowborder
+{
+ font-size:14px;
+font-weight:bold;
+font-color: violet;
+}
+
+#content .container, #subcontent .container {
+    max-width: 100%;
+    padding-top: 20px;
+}
+.imagepadding
+{
+padding-top:100px;
+position:relative;
+display:inline-block;
+horizontal-align: middle; 
+}
+.account-form {
+    max-width: 400px;
+    padding: 15px;
+    margin: 0 auto;
+    padding-top: 50px;
+}

@@ -1,0 +1,44 @@
+
+<template name="HomePrivate">
+	<div class="page-container container" id="content">
+		<div class="row" id="title_row">
+			<div class="col-md-12">
+				<h2 id="page_title" class="pull-left">
+					Welcome {{userFullName}}!
+				</h2></div>
+				<div id="page_menu" class=" col-md-12 pull-left">
+				<div class="tableborder">
+				<div class="divborder"><span class="rowborder">Policy Number</span><span >:
+				{{getRecords.PolicyNumber}}
+				</span>
+				
+				</div>
+				<div class="divborder"><span class="rowborder">InsuranceCompany</span><span>:
+				{{getRecords.InsuranceCompany}}
+				</span>
+				</div>
+					<div class="divborder"><span class="rowborder">Policy Holder Name</span><span >:
+				{{getRecords.PolicyHolderName}}
+				</span>
+				</div>
+				<div class="divborder"><span class="rowborder">Policy From</span><span >:
+				{{getRecords.PolicyFrom}}
+				</span>
+				</div>
+				<div class="divborder"><span class="rowborder">Policy To</span><span>:
+				{{getRecords.PolicyTo}}
+				</span>
+				</div>
+				</div>
+				<div class="imagepadding">
+				<img src="whoareu.jpg" alt="login with face book" height="60" width="60"><span>
+				<span><img alt="follow me on facebook" src="//login.create.net/images/icons/user/facebook_30x30.png" border=0></span>
+				<span style="color:blue;padding-left:10px;">Connected with facebook</span><br/><span>Profile Name:</span><br/>
+				
+				</span>
+				</div>
+		</div>
+		</div>
+	</div>
+</template>
+
