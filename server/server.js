@@ -1,9 +1,19 @@
-
 var verifyEmail = false;
-var jsonResponse = null;
-Accounts.config({ sendVerificationEmail: verifyEmail });
 
-  
+Accounts.onCreateUser(function(options, user) {
+    // We still want the default hook's 'profile' behavior.
+    if (options.profile) {
+        user.profile = options.profile;
+        user.profile.memberSince = new Date();
+
+        // Copy data from Facebook to user object
+        user.profile.facebookId = user.services.facebook.id;
+        user.profile.firstName = user.services.facebook.first_name;
+        user.profile.email = user.services.facebook.email;
+        user.profile.link = user.services.facebook.link;
+    }
+    return user;
+});
 
 Meteor.startup(function() {
 
@@ -13,72 +23,37 @@ Meteor.startup(function() {
 			process.env[variableName] = Meteor.settings.env[variableName];
 		}
 	}
-	
-	//
-	// Setup OAuth login service configuration (read from Meteor.settings)
-	//
-	// Your settings file should look like this:
-	//
-	// {
-	//     "oauth": {
-	//         "google": {
-	//             "clientId": "yourClientId",
-	//             "secret": "yourSecret"
-	//         },
-	//         "github": {
-	//             "clientId": "yourClientId",
-	//             "secret": "yourSecret"
-	//         }
-	//     }
-	// }
-
-		// facebook
-		//if(Meteor.settings.oauth.facebook && _.isObject(Meteor.settings.oauth.facebook)) {
-			// remove old configuration
-			//Accounts.loginServiceConfiguration.remove({
-				//service: "facebook"
-			//});
-
-			//var settingsObject = Meteor.settings.oauth.facebook;
-			//settingsObject.service = "facebook";
-
-			// add new configuration
-			//Accounts.loginServiceConfiguration.insert(settingsObject);
-		//}
 		
-		
-	
 });
 
-var  j=0;
 Meteor.methods({
+	"validateHealthcareUser": function(hcUsername, pwd){
 
-	"getPolicyRecords": function(email_id){
+		// Get healthcareUsers Records from Mock API
+		var res = Meteor.http.call(
+			'GET', 
+			'http://demo5522401.mockable.io/NewHealthcareRecords'); 
 
-
-	
-		 jsonResponse = Meteor.http.call('GET', 'http://demo6938769.mockable.io/healthcaresocialapi');
-		 	 
-		for (i = 0; i < 1000; i++) 
-	 {
-	  
-			if(Meteor.user().profile.email==JSON.parse(jsonResponse.content).userA[i].HealthCareLogin)
-			{
-			if(j!=1)
-			{
-						 jsonResponse = JSON.parse(jsonResponse.content).userA[i];
-						 
-						break;
-						j++;
-					}	
+		if (res && res.statusCode == 200) {
+			//return JSON.parse(res.content).HealthcareRecords[0];
+			var hcRecords = JSON.parse(res.content).HealthcareRecords;
+			if(hcRecords.length > 0) {
+				for(i = 0; i < hcRecords.length; i++) {				
+						if(hcUsername === hcRecords[i]._id 
+								&& pwd === hcRecords[i].password) {
+							return hcRecords[i];
+					}
+				}
 			}
-			
-	}
-
-		return jsonResponse;
+			else {
+				console.log("Zero records in healthcareRecords from Mock API");
+			} 
+		}
+		else {
+			console.log("Failure to fetch healthcareRecords from Mock API");
+		}
+		return null;	
 	},
-	
-	
 	"createUserAccount": function(options) {
 		if(!Users.isAdmin(Meteor.userId())) {
 			throw new Meteor.Error(403, "Access denied.");
@@ -136,7 +111,6 @@ Meteor.methods({
 			Accounts.setPassword(userId, password);
 		}
 	},
-
 	"sendMail": function(options) {
 		this.unblock();
 
@@ -144,16 +118,17 @@ Meteor.methods({
 	}
 });
 
+/*
 Accounts.onCreateUser(function (options, user) {
 	user.roles = [];
 
 	if(options.profile) {
 		user.profile = options.profile;
 	}
-
 	
 	return user;
 });
+*/
 
 Accounts.validateLoginAttempt(function(info) {
 

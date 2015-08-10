@@ -2,7 +2,7 @@ this.App = {};
 this.Helpers = {};
 
 Meteor.startup(function() {
-	
+	HealthcareUsers = new Mongo.Collection("healthcareUsers");
 });
 
 App.logout = function() {
@@ -40,7 +40,7 @@ Helpers.menuItemClass = function(routeName) {
 Helpers.userFullName = function() {
 	var name = "";
 	if(Meteor.user() && Meteor.user().profile)
-		name = Meteor.user().profile.name;
+		name = Meteor.user().profile.firstName;
 	return name;
 };
 

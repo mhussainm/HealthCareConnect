@@ -165,9 +165,10 @@ Router.onBeforeAction(function() {
 	}
 });
 
-Router.onBeforeAction(Router.ensureNotLogged, {only: publicRoutes});
-Router.onBeforeAction(Router.ensureLogged, {only: privateRoutes});
-Router.onBeforeAction(Router.ensureGranted, {only: freeRoutes}); // yes, route from free zone can be restricted to specific set of user roles
+// HUSSAIN - Commenting these to hack the Router for our special case
+//Router.onBeforeAction(Router.ensureNotLogged, {only: publicRoutes});
+//Router.onBeforeAction(Router.ensureLogged, {only: privateRoutes});
+//Router.onBeforeAction(Router.ensureGranted, {only: freeRoutes}); // yes, route from free zone can be restricted to specific set of user roles
 
 Router.map(function () {
 	

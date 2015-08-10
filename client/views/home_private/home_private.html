@@ -8,34 +8,42 @@
 				</h2></div>
 				<div id="page_menu" class=" col-md-12 pull-left">
 				<div class="tableborder">
-				<div class="divborder"><span class="rowborder">Policy Number</span><span >:
-				{{getRecords.PolicyNumber}}
-				</span>
+					<div class="divborder"><span class="rowborder">Policy Number</span><span >:
+					{{getRecords.PolicyNumber}}
+					</span>
 				
-				</div>
-				<div class="divborder"><span class="rowborder">InsuranceCompany</span><span>:
-				{{getRecords.InsuranceCompany}}
-				</span>
-				</div>
-					<div class="divborder"><span class="rowborder">Policy Holder Name</span><span >:
-				{{getRecords.PolicyHolderName}}
-				</span>
-				</div>
-				<div class="divborder"><span class="rowborder">Policy From</span><span >:
-				{{getRecords.PolicyFrom}}
-				</span>
-				</div>
-				<div class="divborder"><span class="rowborder">Policy To</span><span>:
-				{{getRecords.PolicyTo}}
-				</span>
-				</div>
+					</div>
+					<div class="divborder"><span class="rowborder">InsuranceCompany</span><span>:
+					{{getRecords.InsuranceCompany}}
+					</span>
+					</div>
+						<div class="divborder"><span class="rowborder">Policy Holder Name</span><span >:
+					{{getRecords.PolicyHolderName}}
+					</span>
+					</div>
+					<div class="divborder"><span class="rowborder">Policy From</span><span >:
+					{{getRecords.PolicyFrom}}
+					</span>
+					</div>
+					<div class="divborder"><span class="rowborder">Policy To</span><span>:
+					{{getRecords.PolicyTo}}
+					</span>
+					</div>
 				</div>
 				<div class="imagepadding">
-				<img src="whoareu.jpg" alt="login with face book" height="60" width="60"><span>
-				<span><a href="#"><img alt="follow me on facebook" src="fb.jpg" height="60" width="200"/></a></span>
-				<br/><span class="divborder rowborder">Profile Name:</span><span>{{userFullName}}</span><br/>
-				
-				</span>
+					<img class="hc-fb-profile-pic" src="{{fbProfilePicHelper}}" alt="FB Profile Picture" />
+					<span>
+				    {{#if currentUser}}
+						<button id="hc-facebook-logout">FB Logout</button>
+					{{else}}
+						<a id="hc-facebook-login" href="#" class="fb-profile-connect">
+							<img alt="Connect with Facebook" src="/img/fb-connect.jpg?rls=201509092316" />
+						</a>
+					{{/if}}					
+					</span> 
+					<br />
+					<span class="divborder rowborder">Profile Name:</span><span>{{userFullName}}</span>
+					<br />
 				</div>
 		</div>
 		</div>
