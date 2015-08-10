@@ -8,24 +8,24 @@
 				</h2></div>
 				<div id="page_menu" class=" col-md-12 pull-left">
 				<div class="tableborder">
-					<div class="divborder"><span class="rowborder">Policy Number</span><span >:
+					<div class="divborder"><span class="rowborder">Policy Number:</span><span>
 					{{getRecords.PolicyNumber}}
 					</span>
 				
 					</div>
-					<div class="divborder"><span class="rowborder">InsuranceCompany</span><span>:
+					<div class="divborder"><span class="rowborder">Insurance Company:</span><span>
 					{{getRecords.InsuranceCompany}}
 					</span>
 					</div>
-						<div class="divborder"><span class="rowborder">Policy Holder Name</span><span >:
+						<div class="divborder"><span class="rowborder">Policy Holder:</span><span>
 					{{getRecords.PolicyHolderName}}
 					</span>
 					</div>
-					<div class="divborder"><span class="rowborder">Policy From</span><span >:
+					<div class="divborder"><span class="rowborder">Policy Started</span><span>
 					{{getRecords.PolicyFrom}}
 					</span>
 					</div>
-					<div class="divborder"><span class="rowborder">Policy To</span><span>:
+					<div class="divborder"><span class="rowborder">Policy Ends</span><span>
 					{{getRecords.PolicyTo}}
 					</span>
 					</div>
@@ -35,6 +35,10 @@
 					<span>
 				    {{#if currentUser}}
 						<button id="hc-facebook-logout">FB Logout</button>
+						&nbsp;&nbsp;&nbsp;&nbsp;
+						<button id="hc-facebook-fetchinfo">My Info</button>
+						&nbsp;&nbsp;&nbsp;&nbsp;
+						<button id="hc-facebook-fetchposts">My Posts</button>						
 					{{else}}
 						<a id="hc-facebook-login" href="#" class="fb-profile-connect">
 							<img alt="Connect with Facebook" src="/img/fb-connect.jpg?rls=201509092316" />

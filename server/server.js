@@ -11,6 +11,17 @@ Accounts.onCreateUser(function(options, user) {
         user.profile.firstName = user.services.facebook.first_name;
         user.profile.email = user.services.facebook.email;
         user.profile.link = user.services.facebook.link;
+        user.profile.fbAccessToken = user.services.facebook.accessToken;
+        
+        // Also link HcUsers
+        var hcUser = HcUsers.findOne({EmailId: user.services.facebook.email});
+        if(hcUser) {
+        	user.profile.hcPolicyNumber = hcUser.PolicyNumber;
+        	user.profile.hcInsCompany = hcUser.InsuranceCompany;
+        	user.profile.hcPolicyHolderName = hcUser.PolicyHolderName;
+        	user.profile.hcPolicyFrom = hcUser.PolicyFrom;
+        	user.profile.hcPolicyTo = hcUser.PolicyTo;        	
+        }
     }
     return user;
 });
@@ -23,10 +34,98 @@ Meteor.startup(function() {
 			process.env[variableName] = Meteor.settings.env[variableName];
 		}
 	}
+	
+	HcUsers = new Mongo.Collection("hcUsers");
+	FbPosts = new Mongo.Collection("fbPosts");
 		
 });
 
+Meteor.publish("healthCareUser", function(){
+	HcUsers.find({});	
+});
+
 Meteor.methods({
+	"fbFetchInfo": function() {
+		if(Meteor.user()) {
+			if (Meteor.user().services && Meteor.user().services.facebook) {
+				var accessToken = Meteor.user().services.facebook.accessToken;
+				if(accessToken) {
+					var fbInfo = HTTP.get("https://graph.facebook.com/me/?" 
+											+ "fields=id,name,location,hometown", 
+											{params: {access_token: accessToken}}).data;
+					//console.log(fbInfo);
+					if(fbInfo) {
+						if (Meteor.user().profile.fbCurrentCity && 
+								Meteor.user().profile.fbCurrentCity !== fbInfo.location.name) {
+								// TODO: Event Msg - User has permanently moved to different city
+						}
+						Meteor.user().profile.fbCurrentCity = fbInfo.location.name;
+						Meteor.user().profile.fbHometown = fbInfo.hometown.name;
+					}
+					return fbInfo; // return to Client
+				}
+			}
+			else {
+				throw "FB Setup or Access Token unavailable";
+			}
+		}
+		else {
+			throw "User unavailable";
+		}
+	},
+	"fbFetchPosts": function() {
+		if(Meteor.user()) {
+			var mUser = Meteor.user();
+			if (mUser.services && mUser.services.facebook) {
+				var accessToken = mUser.services.facebook.accessToken;
+				if(accessToken) {
+					var fbPosts = HTTP.get("https://graph.facebook.com/me/posts", 
+											{params: {access_token: accessToken}}).data;
+					//console.log(fbPostsResponse);
+					if(fbPosts && fbPosts.data && fbPosts.data.length > 0) {
+						var post;
+						var postList = new Array();							
+						for(i = 0; i < fbPosts.data.length; i++) {
+							post = fbPosts.data[i];
+							//console.log("In Posts forloop");
+							if(!post.story)
+								post.story = "";
+							
+							postList.push({
+								_id: post.id,
+								created: post.created_time,
+								userId: mUser._id,
+								facebookId: mUser.services.facebook.id,
+								message: post.message,
+								story: post.story
+							});
+						}
+						
+						// Bulk insert Posts
+						try {	
+							FbPosts.insert(postList);
+						}
+						catch(error) {
+							// do nothing
+							console.log(error);
+						}						
+						
+					}
+					else {
+						console.log("No FB Posts available");
+					}
+									
+					return fbPosts;					
+				}
+			}
+			else {
+				throw "FB Setup or Access Token unavailable";
+			}
+		}
+		else {
+			throw "User unavailable";
+		}	
+	},	
 	"validateHealthcareUser": function(hcUsername, pwd){
 
 		// Get healthcareUsers Records from Mock API
@@ -41,6 +140,16 @@ Meteor.methods({
 				for(i = 0; i < hcRecords.length; i++) {				
 						if(hcUsername === hcRecords[i]._id 
 								&& pwd === hcRecords[i].password) {
+								
+							try {
+								// Remove all records
+								HcUsers.remove({});
+								// Insert  the logged in user															
+								HcUsers.insert(hcRecords[i]);							
+							}
+							catch(error) {
+								// do nothing
+							}
 							return hcRecords[i];
 					}
 				}

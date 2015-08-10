@@ -3,6 +3,10 @@ Template.HomePrivate.rendered = function() {
 			
 };
 
+Meteor.subscribe("healthCareUser");
+
+HcUsers = new Mongo.Collection("hcUsers");
+
 Template.HomePrivate.events({
     'click #hc-facebook-login': function(event) {
     	event.preventDefault();
@@ -23,12 +27,27 @@ Template.HomePrivate.events({
                 throw new Meteor.Error("Logout failed");
             }
         })
-    }
+    },
+    
+    'click #hc-facebook-fetchinfo': function(event) {
+    	event.preventDefault();
+    	Meteor.call("fbFetchInfo", function(err, res) {
+    		console.info('fbInfo', res);
+    	});
+    },
+    
+    'click #hc-facebook-fetchposts': function(event) {
+    	event.preventDefault();
+    	Meteor.call("fbFetchPosts", function(err, res) {
+    		console.info('fbPosts', res);    		
+    	});    	
+    }    
 });;
 
 Template.HomePrivate.helpers({
 	'getRecords' : function() {
-		return Session.get("currentHcUser");
+		//console.info("HcUsers", HcUsers.find({}).count());		
+		return Session.get("currentHcUser");		
 	},
     'fbProfilePicHelper': function() {
     	if(Meteor.user() && Meteor.user().profile) {

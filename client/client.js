@@ -2,7 +2,7 @@ this.App = {};
 this.Helpers = {};
 
 Meteor.startup(function() {
-	HealthcareUsers = new Mongo.Collection("healthcareUsers");
+	
 });
 
 App.logout = function() {
