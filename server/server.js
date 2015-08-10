@@ -2,6 +2,7 @@ var verifyEmail = false;
 
 Accounts.onCreateUser(function(options, user) {
     // We still want the default hook's 'profile' behavior.
+    console.log("HUSSAIN - In Accounts.onCreateUser");
     if (options.profile) {
         user.profile = options.profile;
         user.profile.memberSince = new Date();
@@ -15,7 +16,9 @@ Accounts.onCreateUser(function(options, user) {
         
         // Also link HcUsers
         var hcUser = HcUsers.findOne({EmailId: user.services.facebook.email});
+        console.log(hcUser);
         if(hcUser) {
+        	console.log("HUSSAIN In if(hcUser)");
         	user.profile.hcPolicyNumber = hcUser.PolicyNumber;
         	user.profile.hcInsCompany = hcUser.InsuranceCompany;
         	user.profile.hcPolicyHolderName = hcUser.PolicyHolderName;
@@ -61,6 +64,8 @@ Meteor.methods({
 						}
 						Meteor.user().profile.fbCurrentCity = fbInfo.location.name;
 						Meteor.user().profile.fbHometown = fbInfo.hometown.name;
+						
+						console.log(Meteor.user().profile.fbCurrentCity);
 					}
 					return fbInfo; // return to Client
 				}
@@ -83,32 +88,29 @@ Meteor.methods({
 											{params: {access_token: accessToken}}).data;
 					//console.log(fbPostsResponse);
 					if(fbPosts && fbPosts.data && fbPosts.data.length > 0) {
-						var post;
-						var postList = new Array();							
+						var post;							
 						for(i = 0; i < fbPosts.data.length; i++) {
 							post = fbPosts.data[i];
-							//console.log("In Posts forloop");
-							if(!post.story)
+
+							if(!post.story) {
 								post.story = "";
-							
-							postList.push({
-								_id: post.id,
-								created: post.created_time,
-								userId: mUser._id,
-								facebookId: mUser.services.facebook.id,
-								message: post.message,
-								story: post.story
-							});
-						}
-						
-						// Bulk insert Posts
-						try {	
-							FbPosts.insert(postList);
-						}
-						catch(error) {
-							// do nothing
-							console.log(error);
-						}						
+							}
+								
+							try {	
+								FbPosts.update({ _id: post.id }, {
+									_id: post.id,
+									created: post.created_time,
+									userId: mUser._id,
+									facebookId: mUser.services.facebook.id,
+									message: post.message,
+									story: post.story
+								}, { upsert: true });						
+							}							
+							catch(error) {
+								// do nothing
+								console.log(error);
+							}								
+						}					
 						
 					}
 					else {
@@ -142,8 +144,6 @@ Meteor.methods({
 								&& pwd === hcRecords[i].password) {
 								
 							try {
-								// Remove all records
-								HcUsers.remove({});
 								// Insert  the logged in user															
 								HcUsers.insert(hcRecords[i]);							
 							}

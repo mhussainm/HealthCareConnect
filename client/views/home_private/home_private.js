@@ -1,6 +1,5 @@
 Template.HomePrivate.rendered = function() {
 	
-			
 };
 
 Meteor.subscribe("healthCareUser");
@@ -46,7 +45,7 @@ Template.HomePrivate.events({
 
 Template.HomePrivate.helpers({
 	'getRecords' : function() {
-		//console.info("HcUsers", HcUsers.find({}).count());		
+		console.info("HcUsers - Count", HcUsers.find().count());
 		return Session.get("currentHcUser");		
 	},
     'fbProfilePicHelper': function() {
