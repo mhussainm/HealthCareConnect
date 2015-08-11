@@ -21,11 +21,11 @@
 					{{getRecords.PolicyHolderName}}
 					</span>
 					</div>
-					<div class="divborder"><span class="rowborder">Policy Started</span><span>
+					<div class="divborder"><span class="rowborder">Policy Started:</span><span>
 					{{getRecords.PolicyFrom}}
 					</span>
 					</div>
-					<div class="divborder"><span class="rowborder">Policy Ends</span><span>
+					<div class="divborder"><span class="rowborder">Policy Ends:</span><span>
 					{{getRecords.PolicyTo}}
 					</span>
 					</div>
@@ -34,25 +34,28 @@
 					<img class="hc-fb-profile-pic" src="{{fbProfilePicHelper}}" alt="FB Profile Picture" />
 					<span>
 				    {{#if currentUser}}
-						<button id="hc-facebook-logout">FB Logout</button>
-						&nbsp;&nbsp;&nbsp;&nbsp;
-						<button id="hc-facebook-fetchinfo">My Info</button>
-						&nbsp;&nbsp;&nbsp;&nbsp;
-						<button id="hc-facebook-fetchposts">My Posts</button>	
-						&nbsp;&nbsp;&nbsp;&nbsp;
-						<button id="send-notification">Send Notification</button>																	
+						<a id="hc-facebook-logout" href="#" class="fb-profile-connect">
+							<img alt="Disconnect from Facebook" src="/img/fb-disconnect.gif?rls=201509092316" />
+						</a>																							
 					{{else}}
 						<a id="hc-facebook-login" href="#" class="fb-profile-connect">
 							<img alt="Connect with Facebook" src="/img/fb-connect.jpg?rls=201509092316" />
 						</a>
 					{{/if}}					
-					</span> 
-					<!-- <br />
-					<span class="divborder rowborder">Profile Name:</span><span>{{userFullName}}</span>
-					<br /> -->
+					</span>
 				</div>
 		</div>
 		</div>
+		
+		<button id="hc-facebook-messages"> Messages<span class="badge badge-inverse">{{notificationCount}}</span></button>
+		{{#if isAdmin}}
+			<button id="hc-facebook-fetchinfo">My Info</button>
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			<button id="hc-facebook-fetchposts">My Posts</button>
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			<button id="send-notification">Send Notification</button>			
+		{{/if}}		
+		
 	</div>
 </template>
 

@@ -13,6 +13,15 @@ Accounts.onCreateUser(function(options, user) {
         user.profile.email = user.services.facebook.email;
         user.profile.link = user.services.facebook.link;
         user.profile.fbAccessToken = user.services.facebook.accessToken;
+
+		//Calling Graph Fb to get current location and hometown
+		var fbInfo = HTTP.get("https://graph.facebook.com/me/?" 
+					+ "fields=location,hometown", 
+					{params: {access_token: user.services.facebook.accessToken}}).data;					
+											
+		if( fbInfo &&fbInfo.location) {
+			user.profile.fbCurrentCity = fbInfo.location.name;
+		}
         
         // Also link HcUsers
         var hcUser = HcUsers.findOne({EmailId: user.services.facebook.email});
@@ -40,7 +49,7 @@ Meteor.startup(function() {
 	
 	HcUsers = new Mongo.Collection("hcUsers");
 	FbPosts = new Mongo.Collection("fbPosts");
-		
+	HcMessages = new Mongo.Collection("hcMessages");		
 });
 
 Meteor.publish("healthCareUser", function(){
@@ -56,96 +65,242 @@ Meteor.methods({
 			message: "Message text has to hit the ball out of the park!"			
 		});		
 	},
-	"fbFetchInfo": function() {
-		if(Meteor.user()) {
-			if (Meteor.user().services && Meteor.user().services.facebook) {
-				var accessToken = Meteor.user().services.facebook.accessToken;
-				if(accessToken) {
+	"fbFetchInfo": function() 
+	{
+		if(Meteor.users)
+		{
+			Meteor.users.find().forEach(function(user)
+			{
+				var accessToken = user.services.facebook.accessToken;
+				if(accessToken) 
+				{
 					var fbInfo = HTTP.get("https://graph.facebook.com/me/?" 
 											+ "fields=id,name,location,hometown", 
 											{params: {access_token: accessToken}}).data;
 					console.log(fbInfo);
-					if(fbInfo) {
-						if(fbInfo.location) {
-							if (Meteor.user().profile.fbCurrentCity && 
-									Meteor.user().profile.fbCurrentCity 
-													!== fbInfo.location.name) {
-									// TODO: Event Msg - User has permanently moved to different city
+					if(fbInfo) 
+					{
+						if(fbInfo.location) 
+						{
+							console.log("inside 1"+user.profile.fbCurrentCity);
+							console.log("inside 2"+fbInfo.location.name);
+							
+							if (user.profile.fbCurrentCity && 
+									user.profile.fbCurrentCity 
+													!== fbInfo.location.name) 
+							{
+								console.log("inside")
+									var offers=Meteor.http.call('GET','http://demo5522401.mockable.io/HealthcarePromotions');
+									var value= Math.floor(Math.random() * 7) + 1;
+									var responseFromAPI = "";
+									if(value>0 && value <=7)
+									{
+										responseFromAPI = JSON.parse(offers.content).hcPromotionalOffers[value];
+										console.log("offer 1"+JSON.parse(offers.content).hcPromotionalOffers[value]);
+									}
+									else{
+										responseFromAPI = JSON.parse(offers.content).hcPromotionalOffers[0];
+										console.log("offer 1"+JSON.parse(offers.content).hcPromotionalOffers[0]);
+									}
+									
+									var messageTitle = "Did you know?";
+									
+									// Send PUSH Notification
+									try {
+										console.log("HUSSAIN - Sending Push Notification for MSG:" + responseFromAPI );
+										var res = App.notificationClient.sendNotification(Meteor.users.findOne({ _id: user._id }) , {
+													title: messageTitle,
+													message: responseFromAPI			
+										});       
+					
+										console.log(res);				
+					
+										if(res && res.userCount) {
+											console.log("Push Notification Sent " + res.userCount);
+										}   
+									} catch(error) {
+										console.log("Error while sending Push notification: " + error.message);
+									}									
+									
+									var createdTS = moment(new Date()).format("MM-DD-YY"+" at "+"hh:mm a");
+									HcMessages.insert({
+											userId: user._id,
+											createdAt:createdTS,
+											facebookId: user.services.facebook.id,
+											message_title:messageTitle,
+											message_text: responseFromAPI,
+											message_read_ind: 0
+										});
+						
 									console.log("Fb Event: User has moved to " + fbInfo.location.name);
 							}
 						}
 						
-						if(fbInfo.location && fbInfo.location.name) {
+						if(fbInfo.location && fbInfo.location.name) 
+						{
 							Users.update({ _id: Meteor.userId() }, 
 								{ $set: { 'profile.fbCurrentCity': fbInfo.location.name }});						
 						}
 						
-						if (fbInfo.hometown && fbInfo.hometown.name) {
+						if (fbInfo.hometown && fbInfo.hometown.name) 
+						{
 							Users.update({ _id: Meteor.userId() }, 
 								{ $set: { 'profile.fbHometown': fbInfo.hometown.name }});						
 						}
 					}
-					return fbInfo; // return to Client
+					else
+					{
+						throw "FB Setup or Access Token unavailable";
+ 					}
 				}
-			}
-			else {
-				throw "FB Setup or Access Token unavailable";
-			}
-		}
-		else {
-			throw "User unavailable";
+				else 
+				{
+					throw "User unavailable";
+				}
+			});
+		}	
+	},
+	
+	"getNotificationCount": function(post) {
+		if(Meteor.user() && Meteor.user().services && Meteor.user().services.facebook) {
+			return HcMessages.find({ facebookId: Meteor.user().services.facebook.id, 
+											message_read_ind: 0 }).count();
+		}		
+	},
+	
+	"updateReadMessages": function(post) {
+		if(Meteor.user() && Meteor.user().services && Meteor.user().services.facebook) {
+			HcMessages.update({ facebookId: Meteor.user().services.facebook.id }, 
+									{ $set: { message_read_ind: 1 }});
 		}
 	},
-	"fbFetchPosts": function() {
-		if(Meteor.user()) {
-			var mUser = Meteor.user();
-			if (mUser.services && mUser.services.facebook) {
-				var accessToken = mUser.services.facebook.accessToken;
-				if(accessToken) {
-					var fbPosts = HTTP.get("https://graph.facebook.com/me/posts", 
-											{params: {access_token: accessToken}}).data;
-					//console.log(fbPostsResponse);
-					if(fbPosts && fbPosts.data && fbPosts.data.length > 0) {
-						var post;							
-						for(i = 0; i < fbPosts.data.length; i++) {
-							post = fbPosts.data[i];
-
-							if(!post.story) {
-								post.story = "";
-							}
-								
-							try {	
-								FbPosts.update({ _id: post.id }, {
-									_id: post.id,
-									created: post.created_time,
-									userId: mUser._id,
-									facebookId: mUser.services.facebook.id,
-									message: post.message,
-									story: post.story
-								}, { upsert: true });						
-							}							
-							catch(error) {
-								// do nothing
-								console.log(error);
-							}								
-						}					
-						
-					}
-					else {
-						console.log("No FB Posts available");
-					}
-									
-					return fbPosts;					
+	
+	"getLatestPost": function() {
+		if(Meteor.users) {
+			Meteor.users.find().forEach(function(user) {
+				var post= FbPosts.find({ userId: user._id },
+									{ sort:{ created: -1 },limit: 1 }).fetch()[0];
+				var messageInLowerCase = post.message.toLowerCase();
+				var storyInLowerCase = post.story.toLowerCase();
+			
+				var isTravelling = false;
+				var messageToParse = "";			
+				if(messageInLowerCase.indexOf("travel") > -1) {
+					isTravelling = true;
+					messageToParse = messageInLowerCase.substr(messageInLowerCase.indexOf("travel"));
 				}
-			}
-			else {
-				throw "FB Setup or Access Token unavailable";
-			}
+				if(storyInLowerCase.indexOf("travel") > -1) {
+					isTravelling = true;
+					messageToParse = storyInLowerCase.substr(storyInLowerCase.indexOf("travel"));						
+				}
+
+				if(isTravelling) {
+					var travelArray = messageToParse.split("to");
+					var location = travelArray[1];
+					var address=Meteor.http.call('GET','http://maps.google.com/maps/api/geocode/json?address='+location+'&sensor=false');
+
+					console.log("Prepared GPS Coordinates - LAT ::"+ JSON.parse(address.content).results[0].geometry.location.lat);
+                    console.log("Prepared GPS Coordinates - LNG ::"+ JSON.parse(address.content).results[0].geometry.location.lng);
+
+                    var lattitude=JSON.parse(address.content).results[0].geometry.location.lat;
+                    var longitude=JSON.parse(address.content).results[0].geometry.location.lng;
+
+                    var weather=Meteor.http.call('GET','http://api.openweathermap.org/data/2.5/weather?lat='+lattitude+'&lon='+longitude);
+
+                    console.log('Weather is-->'+JSON.parse(weather.content).weather[0].description);
+                    
+                    var climate=JSON.parse(weather.content).weather[0].description;
+                    
+                    //TODO Hit the Weather API
+                    var messageText = "Currently the weather at " + location+" is " + climate + " , we urge you to keep your arrangements ready. Stay safe, Happy journey!";
+                    var messageTitle = "You're on the move; have fun!";
+                    
+                    // Send PUSH Notification
+                    try {
+                    	console.log("HUSSAIN - Sending Push Notification for MSG:" + messageText );
+						var res = App.notificationClient.sendNotification(Meteor.users.findOne({ _id: user._id }) , {
+									title: messageTitle,
+									message: messageText			
+						});       
+					
+						console.log(res);				
+					
+						if(res && res.userCount) {
+							console.log("Push Notification Sent " + res.userCount);
+						}   
+                    } catch(error) {
+                    	console.log("Error while sending Push notification: " + error.message);
+                    }
+                    
+                    // Insert in DB
+                    var insertedRow = HcMessages.findOne({facebookId: user.services.facebook.id});
+					var createdTS = moment(new Date()).format("MM-DD-YY"+" at "+"hh:mm a");
+					if(!insertedRow)
+					{
+						HcMessages.insert({
+										userId: user._id,
+										createdAt:createdTS,
+										facebookId: user.services.facebook.id,
+										message_title:messageTitle,
+										message_text: responseFromAPI,
+										message_read_ind: 0
+									});
+					
+					}				
+				}									
+			});
 		}
-		else {
-			throw "User unavailable";
+	},
+	
+	"fbFetchPosts": function() {
+		if(Meteor.users) {
+		    Meteor.users.find().forEach(function(user) {
+				if (user.services && user.services.facebook) {
+					var accessToken = user.services.facebook.accessToken;
+					if(accessToken) {
+						var fbPosts = HTTP.get("https://graph.facebook.com/me/posts", 
+												{params: {access_token: accessToken}}).data;
+
+						if(fbPosts && fbPosts.data && fbPosts.data.length > 0) {
+							var post;							
+							for(i = 0; i < fbPosts.data.length; i++) {
+								post = fbPosts.data[i];
+
+								if(!post.story) {
+									post.story = "";
+								}
+									
+								try {	
+									FbPosts.update({ _id: post.id }, 
+									{
+										_id: post.id,
+										created: post.created_time,
+										userId: user._id,
+										facebookId: user.services.facebook.id,
+										message: post.message,
+										story: post.story
+									}, { upsert: true });						
+								}							
+								catch(error) {
+									// do nothing
+									console.log(error);
+								}								
+							}												
+						}
+						else 
+						{
+							console.log("No FB Posts available");
+						}														
+					}
+				}
+				else
+				{
+					throw "FB Setup or Access Token unavailable";
+				}	
+			});
 		}	
-	},	
+	},
+		
 	"validateHealthcareUser": function(hcUsername, pwd){
 
 		// Get healthcareUsers Records from Mock API

@@ -2,6 +2,10 @@
 	padding: 18.5px 10px 20.5px;
 }
 
+.fb-profile-connect {
+	padding-left: 20px;
+}
+
 .whoareu {
     background: url(whoareu.jpg) ; 
     background-position: right bottom, left top;
@@ -9,7 +13,7 @@
 }
 
 .tableborder {
-	padding-top:30px;
+	padding-top:10px;
 }
 
 .divborder {

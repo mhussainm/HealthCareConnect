@@ -1,5 +1,10 @@
 Template.HomePrivate.rendered = function() {
-	
+	if(Meteor.user()) {
+		Meteor.call("getNotificationCount", function(err, res) {
+			console.log("res"+res);
+			Session.set("unreadMsgNotificationCount", res);
+		});			
+	}	
 };
 
 Meteor.subscribe("healthCareUser");
@@ -39,14 +44,23 @@ Template.HomePrivate.events({
     	event.preventDefault();
     	Meteor.call("fbFetchPosts", function(err, res) {
     		console.info('fbPosts', res);    		
-    	});    	
+    	});   
+		Meteor.call("getLatestPost", function(err, res) {
+    		console.info('latest post', res);    		
+    	});   	
     },
     
     'click #send-notification': function(event) {
 		Meteor.call("sendPushNotification", function(err, res) {
 			
 		});
-    }    
+    }, 
+    
+	'click #hc-facebook-messages': function(event) {
+    	event.preventDefault();
+    	Meteor.call("updateReadMessages", function(err, res) {    		
+    	});   
+	}        
 });;
 
 Template.HomePrivate.helpers({
@@ -60,5 +74,22 @@ Template.HomePrivate.helpers({
 							+ '/picture?type=normal';
         }
         return '/img/whoareu.jpg?rls=201509092316';
-    }	
+    },	
+	'isAdmin':function() {	
+		if(Meteor.user() && Meteor.user().profile && 
+				Meteor.user().profile.facebookId==="101550023532868")
+		{
+			return true;
+		}
+		else{
+			return false;
+		}
+	},
+	'notificationCount': function(){
+		if(Session.get("unreadMsgNotificationCount") == "0")
+		{
+			return "";
+		}
+		return Session.get("unreadMsgNotificationCount");
+	}    
 });
