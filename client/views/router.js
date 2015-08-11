@@ -15,7 +15,7 @@ var publicRoutes = [
 ];
 
 var privateRoutes = [
-	//"home_private",
+	"home_private",
 	"user_settings",
 	"user_settings.profile",
 	"user_settings.change_pass",
@@ -23,7 +23,7 @@ var privateRoutes = [
 ];
 
 var freeRoutes = [
-	"home_private"
+	//"home_private"
 ];
 
 var roleMap = [
@@ -178,9 +178,9 @@ Router.onBeforeAction(function() {
 });
 
 // HUSSAIN - Commenting these to hack the Router for our special case
-Router.onBeforeAction(Router.ensureNotLogged, {only: publicRoutes});
-Router.onBeforeAction(Router.ensureLogged, {only: privateRoutes});
-Router.onBeforeAction(Router.ensureGranted, {only: freeRoutes}); // yes, route from free zone can be restricted to specific set of user roles
+//Router.onBeforeAction(Router.ensureNotLogged, {only: publicRoutes});
+//Router.onBeforeAction(Router.ensureLogged, {only: privateRoutes});
+//Router.onBeforeAction(Router.ensureGranted, {only: freeRoutes}); // yes, route from free zone can be restricted to specific set of user roles
 
 Router.map(function () {
 	
