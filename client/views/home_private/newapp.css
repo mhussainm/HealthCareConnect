@@ -1,3 +1,7 @@
+#wrap a.navbar-brand {
+	padding: 18.5px 10px 20.5px;
+}
+
 .whoareu {
     background: url(whoareu.jpg) ; 
     background-position: right bottom, left top;
@@ -24,10 +28,9 @@
 }
 
 .imagepadding {
-	padding-top:100px;
-	position:relative;
-	display:inline-block;
-	horizontal-align: middle; 
+	padding-top: 40px;
+	position: relative;
+	display: inline-block;
 }
 
 .account-form {

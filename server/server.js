@@ -48,6 +48,14 @@ Meteor.publish("healthCareUser", function(){
 });
 
 Meteor.methods({
+	"sendPushNotification": function() {
+		var usersWithRegisteredDevice = Meteor.users.find( { regid: { $exists: true } } ).fetch();
+		console.log('HUSSAIN - In server sendPushNotification()');
+		return App.notificationClient.sendNotification(usersWithRegisteredDevice, {
+			title: "Default Title",
+			message: "Message text has to hit the ball out of the park!"			
+		});		
+	},
 	"fbFetchInfo": function() {
 		if(Meteor.user()) {
 			if (Meteor.user().services && Meteor.user().services.facebook) {
@@ -56,16 +64,26 @@ Meteor.methods({
 					var fbInfo = HTTP.get("https://graph.facebook.com/me/?" 
 											+ "fields=id,name,location,hometown", 
 											{params: {access_token: accessToken}}).data;
-					//console.log(fbInfo);
+					console.log(fbInfo);
 					if(fbInfo) {
-						if (Meteor.user().profile.fbCurrentCity && 
-								Meteor.user().profile.fbCurrentCity !== fbInfo.location.name) {
-								// TODO: Event Msg - User has permanently moved to different city
+						if(fbInfo.location) {
+							if (Meteor.user().profile.fbCurrentCity && 
+									Meteor.user().profile.fbCurrentCity 
+													!== fbInfo.location.name) {
+									// TODO: Event Msg - User has permanently moved to different city
+									console.log("Fb Event: User has moved to " + fbInfo.location.name);
+							}
 						}
-						Meteor.user().profile.fbCurrentCity = fbInfo.location.name;
-						Meteor.user().profile.fbHometown = fbInfo.hometown.name;
 						
-						console.log(Meteor.user().profile.fbCurrentCity);
+						if(fbInfo.location && fbInfo.location.name) {
+							Users.update({ _id: Meteor.userId() }, 
+								{ $set: { 'profile.fbCurrentCity': fbInfo.location.name }});						
+						}
+						
+						if (fbInfo.hometown && fbInfo.hometown.name) {
+							Users.update({ _id: Meteor.userId() }, 
+								{ $set: { 'profile.fbHometown': fbInfo.hometown.name }});						
+						}
 					}
 					return fbInfo; // return to Client
 				}

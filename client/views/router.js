@@ -30,6 +30,9 @@ var roleMap = [
 	
 ];
 
+var LoggedInUser = Session.get("currentHcUser");
+console.log(LoggedInUser);
+
 this.firstGrantedRoute = function(preferredRoute) {
 	if(preferredRoute && routeGranted(preferredRoute)) return preferredRoute;
 
@@ -88,27 +91,33 @@ this.routeGranted = function(routeName) {
 		return true;
 	}
 
-	if(!Meteor.user() || !Meteor.user().roles) {
+	//if(!Meteor.user() || !Meteor.user().roles) {
+	if(!LoggedInUser) {
 		// user is not logged in
 		return false;
 	}
 
 	// this page is restricted to some role(s), check if user is in one of allowedRoles
+	/*
 	var allowedRoles = roleMapItem.roles;
 	var granted = _.intersection(allowedRoles, Meteor.user().roles);
 	if(!granted || granted.length === 0) {
 		return false;
 	}
-
+	*/
+	
 	return true;
 };
 
 Router.ensureLogged = function() {
+	/*
 	if(Meteor.userId() && (!Meteor.user() || !Meteor.user().roles)) {
 		return;
 	}
-
-	if(!Meteor.userId()) {
+	*/
+	
+	//if(!Meteor.userId()) {
+	if(!LoggedInUser) {	
 		// user is not logged in - redirect to public home
 		var redirectRoute = firstGrantedRoute("home_public");
 		this.redirect(redirectRoute);
@@ -125,11 +134,14 @@ Router.ensureLogged = function() {
 };
 
 Router.ensureNotLogged = function() {
+	/*
 	if(Meteor.userId() && (!Meteor.user() || !Meteor.user().roles)) {
 		return;
 	}
-
-	if(Meteor.userId()) {
+	*/
+	
+	//if(Meteor.userId()) {
+	if(LoggedInUser) {	
 		var redirectRoute = firstGrantedRoute("home_private");
 		this.redirect(redirectRoute);
 	}
@@ -140,10 +152,12 @@ Router.ensureNotLogged = function() {
 
 // called for pages in free zone - some of pages can be restricted
 Router.ensureGranted = function() {
+	/*
 	if(Meteor.userId() && (!Meteor.user() || !Meteor.user().roles)) {
 		return;
 	}
-
+	*/
+	
 	if(!routeGranted(this.route.getName())) {
 		// user is not in allowedRoles - redirect to first granted route
 		var redirectRoute = firstGrantedRoute("");
@@ -166,9 +180,9 @@ Router.onBeforeAction(function() {
 });
 
 // HUSSAIN - Commenting these to hack the Router for our special case
-//Router.onBeforeAction(Router.ensureNotLogged, {only: publicRoutes});
-//Router.onBeforeAction(Router.ensureLogged, {only: privateRoutes});
-//Router.onBeforeAction(Router.ensureGranted, {only: freeRoutes}); // yes, route from free zone can be restricted to specific set of user roles
+Router.onBeforeAction(Router.ensureNotLogged, {only: publicRoutes});
+Router.onBeforeAction(Router.ensureLogged, {only: privateRoutes});
+Router.onBeforeAction(Router.ensureGranted, {only: freeRoutes}); // yes, route from free zone can be restricted to specific set of user roles
 
 Router.map(function () {
 	

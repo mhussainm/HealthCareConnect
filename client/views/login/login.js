@@ -4,6 +4,7 @@ pageSession.set("errorMessage", "");
 
 Template.Login.rendered = function() {
 	$("input[autofocus]").focus();
+	
 };
 
 Template.Login.created = function() {

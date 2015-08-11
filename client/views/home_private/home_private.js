@@ -40,6 +40,12 @@ Template.HomePrivate.events({
     	Meteor.call("fbFetchPosts", function(err, res) {
     		console.info('fbPosts', res);    		
     	});    	
+    },
+    
+    'click #send-notification': function(event) {
+		Meteor.call("sendPushNotification", function(err, res) {
+			
+		});
     }    
 });;
 
