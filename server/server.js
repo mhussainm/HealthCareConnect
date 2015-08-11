@@ -242,7 +242,7 @@ Meteor.methods({
 										createdAt:createdTS,
 										facebookId: user.services.facebook.id,
 										message_title:messageTitle,
-										message_text: responseFromAPI,
+										message_text: messageText,
 										message_read_ind: 0
 									});
 					

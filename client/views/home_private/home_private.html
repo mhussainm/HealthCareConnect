@@ -44,10 +44,15 @@
 					{{/if}}					
 					</span>
 				</div>
-		</div>
+			</div>
 		</div>
 		
+		{{#if currentUser}}		
 		<button id="hc-facebook-messages"> Messages<span class="badge badge-inverse">{{notificationCount}}</span></button>
+		{{else}}
+		<!-- do nothing -->
+		{{/if}}			
+		
 		{{#if isAdmin}}
 			<button id="hc-facebook-fetchinfo">My Info</button>
 			&nbsp;&nbsp;&nbsp;&nbsp;
