@@ -25,9 +25,9 @@ Accounts.onCreateUser(function(options, user) {
         
         // Also link HcUsers
         var hcUser = HcUsers.findOne({EmailId: user.services.facebook.email});
-        console.log(hcUser);
+        
         if(hcUser) {
-        	console.log("HUSSAIN In if(hcUser)");
+        	console.log("HUSSAIN hcUser match found for " + hcUser.PolicyHolderName);
         	user.profile.hcPolicyNumber = hcUser.PolicyNumber;
         	user.profile.hcInsCompany = hcUser.InsuranceCompany;
         	user.profile.hcPolicyHolderName = hcUser.PolicyHolderName;

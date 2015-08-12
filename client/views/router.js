@@ -11,7 +11,8 @@ var publicRoutes = [
 	"login",
 	"register",
 	"forgot_password",
-	"reset_password"
+	"reset_password",
+	"trigger"
 ];
 
 var privateRoutes = [
@@ -194,17 +195,23 @@ Router.map(function () {
 	this.route("user_settings.profile", {path: "/user_settings/profile", controller: "UserSettingsProfileController"});
 	this.route("user_settings.change_pass", {path: "/user_settings/change_pass", controller: "UserSettingsChangePassController"});
 	this.route("logout", {path: "/logout", controller: "LogoutController"});
+	this.route("trigger", {path: "/trigger", controller: "TriggerController"});	
 });
 
+/* HUSSAIN - for a later day
 // Creating Server-side webhook for external triggers (Azure Scheduled Jobs)
 Router.route('/trigger', { where: 'server' })
   .get(function () {
+  		console.log("HUSSAIN - In Route.route.Trigger: GET");
 		console.log(this.params);
 		if (this.params) {
 			console.log(this.params.query);
-			console.log(this.params.query.action);
+			if (this.params.query) {
+				console.log(this.params.query.action);
+			}
 		}
   })
   .post(function () {
-    // POST /webhooks/stripe
+  		console.log("HUSSAIN - In Route.route.Trigger: POST");
   });
+*/
