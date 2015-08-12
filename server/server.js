@@ -122,11 +122,13 @@ Meteor.methods({
 										console.log("Error while sending Push notification: " + error.message);
 									}									
 									
+									var facebookPostId = user.services.facebook.id+"not_a_post";
 									var createdTS = moment(new Date()).format("MM-DD-YY"+" at "+"hh:mm a");
 									HcMessages.insert({
 											userId: user._id,
 											createdAt:createdTS,
-											facebookId: user.services.facebook.id,
+											facebookUserId: user.services.facebook.id,
+											facebookPostId: facebookPostId,
 											message_title:messageTitle,
 											message_text: responseFromAPI,
 											message_read_ind: 0
@@ -138,13 +140,13 @@ Meteor.methods({
 						
 						if(fbInfo.location && fbInfo.location.name) 
 						{
-							Users.update({ _id: Meteor.userId() }, 
+							Users.update({ _id: user._id }, 
 								{ $set: { 'profile.fbCurrentCity': fbInfo.location.name }});						
 						}
 						
 						if (fbInfo.hometown && fbInfo.hometown.name) 
 						{
-							Users.update({ _id: Meteor.userId() }, 
+							Users.update({ _id: user._id }, 
 								{ $set: { 'profile.fbHometown': fbInfo.hometown.name }});						
 						}
 					}
@@ -163,16 +165,21 @@ Meteor.methods({
 	
 	"getNotificationCount": function(post) {
 		if(Meteor.user() && Meteor.user().services && Meteor.user().services.facebook) {
-			return HcMessages.find({ facebookId: Meteor.user().services.facebook.id, 
+			console.log("count+"+
+			HcMessages.find({ facebookUserId: Meteor.user().services.facebook.id, message_read_ind: 0 }).count())
+			return HcMessages.find({facebookUserId: Meteor.user().services.facebook.id, 
 											message_read_ind: 0 }).count();
 		}		
 	},
 	
 	"updateReadMessages": function(post) {
 		if(Meteor.user() && Meteor.user().services && Meteor.user().services.facebook) {
-			HcMessages.update({ facebookId: Meteor.user().services.facebook.id }, 
-									{ $set: { message_read_ind: 1 }}, 
-									{ multi: true });
+			HcMessages.update(
+				{ facebookUserId: Meteor.user().services.facebook.id }, 
+			
+				{ $set: { message_read_ind: 1 }},
+				{ multi:true }
+			);
 		}
 	},
 	
@@ -181,76 +188,100 @@ Meteor.methods({
 			Meteor.users.find().forEach(function(user) {
 				var post= FbPosts.find({ userId: user._id },
 									{ sort:{ created: -1 },limit: 1 }).fetch()[0];
-				var messageInLowerCase = post.message.toLowerCase();
-				var storyInLowerCase = post.story.toLowerCase();
-			
-				var isTravelling = false;
-				var messageToParse = "";			
-				if(messageInLowerCase.indexOf("travel") > -1) {
-					isTravelling = true;
-					messageToParse = messageInLowerCase.substr(messageInLowerCase.indexOf("travel"));
-				}
-				if(storyInLowerCase.indexOf("travel") > -1) {
-					isTravelling = true;
-					messageToParse = storyInLowerCase.substr(storyInLowerCase.indexOf("travel"));						
-				}
-
-				if(isTravelling) {
-					var travelArray = messageToParse.split("to");
-					var location = travelArray[1];
-					var address = Meteor.http.call('GET','http://maps.google.com/maps/api/geocode/json?address=' + location + '&sensor=false');
-
-					console.log("Prepared GPS Coordinates - LAT ::"+ JSON.parse(address.content).results[0].geometry.location.lat);
-                    console.log("Prepared GPS Coordinates - LNG ::"+ JSON.parse(address.content).results[0].geometry.location.lng);
-
-                    var lattitude=JSON.parse(address.content).results[0].geometry.location.lat;
-                    var longitude=JSON.parse(address.content).results[0].geometry.location.lng;
-
-                    var weather=Meteor.http.call('GET','http://api.openweathermap.org/data/2.5/weather?lat='+lattitude+'&lon='+longitude);
-
-                    console.log('Weather is-->'+JSON.parse(weather.content).weather[0].description);
-                    
-                    var climate = JSON.parse(weather.content).weather[0].description;
-                    
-                    //TODO Hit the Weather API
-                    var messageText = "Currently the weather at " + location + " is " + climate + " , we urge you to keep your arrangements ready. Stay safe, Happy journey!";
-                    var messageTitle = "You're on the move; have fun!";
-                    
-                    // Send PUSH Notification
-                    try {
-                    	console.log("HUSSAIN - Sending Push Notification for MSG:" + messageText );
-						var res = App.notificationClient.sendNotification(Meteor.users.findOne({ _id: user._id }) , {
-									title: messageTitle,
-									message: messageText			
-						});       
 					
-						console.log(res);				
+					var duplicatePostIndicator = HcMessages.find({facebookPostId: post._id}).count();
+					console.log("duplicatePostIndicator"+duplicatePostIndicator);
+					console.log("user._id"+user._id);
+					if(duplicatePostIndicator === 0)
+					{					
+						var messageInLowerCase = post.message.toLowerCase();
+						var storyInLowerCase = post.story.toLowerCase();
 					
-						if(res && res.userCount) {
-							console.log("Push Notification Sent " + res.userCount);
-						}   
-                    } catch(error) {
-                    	console.log("Error while sending Push notification: " + error.message);
-                    }
-                    
-                    // Insert in DB
-                    var insertedRow = HcMessages.findOne({facebookId: user.services.facebook.id});
-					var createdTS = moment(new Date()).format("MM-DD-YY"+" at "+"hh:mm a");
-					if(!insertedRow)
-					{
-						HcMessages.insert({
-										userId: user._id,
-										createdAt:createdTS,
-										facebookUserId: user.services.facebook.id,
-										facebookPostId: post._id,
-										message_title:messageTitle,
-										message_text: messageText,
-										message_read_ind: 0
-									});
-					
-					}				
-				}									
-			});
+						var isTravelling = false;
+						var messageToParse = "";			
+						if(messageInLowerCase.indexOf("travel") > -1) {
+							isTravelling = true;
+							messageToParse = messageInLowerCase.substr(messageInLowerCase.indexOf("travel"));
+						}
+						if(storyInLowerCase.indexOf("travel") > -1) {
+							isTravelling = true;
+							messageToParse = storyInLowerCase.substr(storyInLowerCase.indexOf("travel"));						
+						}
+
+						if(isTravelling) {
+							var travelArray = messageToParse.split("to");
+							var location = travelArray[1];
+							var address=Meteor.http.call('GET','http://maps.google.com/maps/api/geocode/json?address='+location+'&sensor=false');
+
+							console.log("Prepared GPS Coordinates - LAT ::"+ JSON.parse(address.content).results[0].geometry.location.lat);
+							console.log("Prepared GPS Coordinates - LNG ::"+ JSON.parse(address.content).results[0].geometry.location.lng);
+
+							var lattitude=JSON.parse(address.content).results[0].geometry.location.lat;
+							var longitude=JSON.parse(address.content).results[0].geometry.location.lng;
+
+							var weather=Meteor.http.call('GET','http://api.openweathermap.org/data/2.5/weather?lat='+lattitude+'&lon='+longitude);
+
+							console.log('Weather is-->'+JSON.parse(weather.content).weather[0].description);
+							
+							var climate=JSON.parse(weather.content).weather[0].description;
+							
+							//Prepare the message according to response of Weather API
+							var messageText = "Currently the weather at " + location+" is " + climate + " , we urge you to keep your arrangements ready. Stay safe, Happy journey!";
+							var messageTitle="";
+							var sentimentValueFromAzureML = post.sentimentValueFromAzureML;
+							console.log("sentimentValueFromAzureML before preparing message title"+sentimentValueFromAzureML);
+							//Preparing message title with help of azure message learning.
+							if(sentimentValueFromAzureML > 0.6)
+							{
+								messageTitle = "You're on the move; have fun!";
+							}
+							else if(sentimentValueFromAzureML < 0.6 
+										&& sentimentValueFromAzureML > 0.4)
+							{
+								messageTitle = "Have a safe travel.";
+							}
+							else
+							{
+								messageTitle = "Travels are not always fun";
+							}
+							
+							
+							// Send PUSH Notification
+							try {
+								console.log("HUSSAIN - Sending Push Notification for MSG:" + messageText );
+								var res = App.notificationClient.sendNotification(Meteor.users.findOne({ _id: user._id }) , {
+											title: messageTitle,
+											message: messageText			
+								});       
+							
+								console.log(res);				
+							
+								if(res && res.userCount) {
+									console.log("Push Notification Sent " + res.userCount);
+								}   
+							} catch(error) {
+								console.log("Error while sending Push notification: " + error.message);
+							}
+							
+							// Insert in DB
+							var insertedRow = HcMessages.findOne({facebookUserId: user.services.facebook.id});
+							var createdTS = moment(new Date()).format("MM-DD-YY"+" at "+"hh:mm a");
+							if(!insertedRow)
+							{
+								HcMessages.insert({
+												userId: user._id,
+												createdAt:createdTS,
+												facebookUserId: user.services.facebook.id,
+												facebookPostId: post._id,
+												message_title:messageTitle,
+												message_text:messageText,
+												message_read_ind: 0
+											});
+							
+							}				
+						}									
+					}
+				});
 		}
 	},
 	
@@ -267,7 +298,30 @@ Meteor.methods({
 							var post;							
 							for(i = 0; i < fbPosts.data.length; i++) {
 								post = fbPosts.data[i];
-
+								/*
+									Start of Azure Machine Learning - getSentiments Call.
+									We are going to store the sentiment score of each post in the DB.
+								*/
+								var sentimentValueFromAzureML=0;
+								if(post.message)
+								{
+									 var options = {
+													headers :
+													{
+														'Authorization':' Basic YWNjb3VudEtleTpNNHJMclhxRlFlN1hrcVNHWHZjbkVYSWFiWFE0cTNmTUFUT2JqVlBFb2ZJ',						
+														'Content-Type': 'application/json'
+													}	
+												};
+									var textToCheckSentimentOn = post.message;
+									var sentimentObject = 
+												Meteor.http.call("GET","https://api.datamarket.azure.com/amla/text-analytics/GetSentiment?text="+textToCheckSentimentOn , options);
+									sentimentValueFromAzureML = JSON.parse(sentimentObject.content).Score;
+									console.log("sentimentValueFromAzureML"+sentimentValueFromAzureML);
+								}
+								/*
+									End of Azure Machine Learning - getSentiments Call
+								*/
+								
 								if(!post.story) {
 									post.story = "";
 								}
@@ -277,6 +331,7 @@ Meteor.methods({
 									{
 										_id: post.id,
 										created: post.created_time,
+										sentimentValueFromAzureML:sentimentValueFromAzureML,
 										userId: user._id,
 										facebookId: user.services.facebook.id,
 										message: post.message,
