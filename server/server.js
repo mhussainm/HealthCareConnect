@@ -171,7 +171,8 @@ Meteor.methods({
 	"updateReadMessages": function(post) {
 		if(Meteor.user() && Meteor.user().services && Meteor.user().services.facebook) {
 			HcMessages.update({ facebookId: Meteor.user().services.facebook.id }, 
-									{ $set: { message_read_ind: 1 }});
+									{ $set: { message_read_ind: 1 }}, 
+									{ multi: true });
 		}
 	},
 	
@@ -197,7 +198,7 @@ Meteor.methods({
 				if(isTravelling) {
 					var travelArray = messageToParse.split("to");
 					var location = travelArray[1];
-					var address=Meteor.http.call('GET','http://maps.google.com/maps/api/geocode/json?address='+location+'&sensor=false');
+					var address = Meteor.http.call('GET','http://maps.google.com/maps/api/geocode/json?address=' + location + '&sensor=false');
 
 					console.log("Prepared GPS Coordinates - LAT ::"+ JSON.parse(address.content).results[0].geometry.location.lat);
                     console.log("Prepared GPS Coordinates - LNG ::"+ JSON.parse(address.content).results[0].geometry.location.lng);
@@ -209,10 +210,10 @@ Meteor.methods({
 
                     console.log('Weather is-->'+JSON.parse(weather.content).weather[0].description);
                     
-                    var climate=JSON.parse(weather.content).weather[0].description;
+                    var climate = JSON.parse(weather.content).weather[0].description;
                     
                     //TODO Hit the Weather API
-                    var messageText = "Currently the weather at " + location+" is " + climate + " , we urge you to keep your arrangements ready. Stay safe, Happy journey!";
+                    var messageText = "Currently the weather at " + location + " is " + climate + " , we urge you to keep your arrangements ready. Stay safe, Happy journey!";
                     var messageTitle = "You're on the move; have fun!";
                     
                     // Send PUSH Notification
@@ -240,7 +241,8 @@ Meteor.methods({
 						HcMessages.insert({
 										userId: user._id,
 										createdAt:createdTS,
-										facebookId: user.services.facebook.id,
+										facebookUserId: user.services.facebook.id,
+										facebookPostId: post._id,
 										message_title:messageTitle,
 										message_text: messageText,
 										message_read_ind: 0

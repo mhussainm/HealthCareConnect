@@ -195,3 +195,16 @@ Router.map(function () {
 	this.route("user_settings.change_pass", {path: "/user_settings/change_pass", controller: "UserSettingsChangePassController"});
 	this.route("logout", {path: "/logout", controller: "LogoutController"});
 });
+
+// Creating Server-side webhook for external triggers (Azure Scheduled Jobs)
+Router.route('/trigger', { where: 'server' })
+  .get(function () {
+		console.log(this.params);
+		if (this.params) {
+			console.log(this.params.query);
+			console.log(this.params.query.action);
+		}
+  })
+  .post(function () {
+    // POST /webhooks/stripe
+  });

@@ -48,7 +48,11 @@
 		</div>
 		
 		{{#if currentUser}}		
-		<button id="hc-facebook-messages"> Messages<span class="badge badge-inverse">{{notificationCount}}</span></button>
+			<button id="hc-facebook-messages" class="btn btn-lg hc-fb-msg-btn 
+							{{#if notificationCount}} has-notification {{else}} no-notification {{/if}}">
+				Messages
+				<span class="badge badge-inverse">{{notificationCount}}</span>
+			</button>
 		{{else}}
 		<!-- do nothing -->
 		{{/if}}			
