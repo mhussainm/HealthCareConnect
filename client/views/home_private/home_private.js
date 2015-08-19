@@ -77,7 +77,7 @@ Template.HomePrivate.helpers({
     },	
 	'isAdmin':function() {	
 		if(Meteor.user() && Meteor.user().profile && 
-				Meteor.user().profile.facebookId==="101550023532868")
+				Meteor.user().profile.facebookId==="144028039266512")
 		{
 			return true;
 		}

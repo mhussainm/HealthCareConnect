@@ -61,8 +61,8 @@ Meteor.methods({
 		var usersWithRegisteredDevice = Meteor.users.find( { regid: { $exists: true } } ).fetch();
 		console.log('HUSSAIN - In server sendPushNotification()');
 		return App.notificationClient.sendNotification(usersWithRegisteredDevice, {
-			title: "Default Title",
-			message: "Message text has to hit the ball out of the park!"			
+			title: "You're on the move; have fun!",
+			message: "Currently the weather at Mumbai, India is 'warm' , we urge you to keep your arrangements ready. Stay safe, Happy journey!"
 		});		
 	},
 	"fbFetchInfo": function() 
